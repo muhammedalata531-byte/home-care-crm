@@ -406,12 +406,12 @@
   }
 
   // ==========================================
-  // 5. Gemini AI Extractor (Saudi Arabia + Audio Files)
+  // 5. Gemini AI Extractor
   // ==========================================
   class GeminiExtractor {
-    constructor(apiKey = '', model = 'gemini-2.5-flash') {
+    constructor(apiKey = '', model = 'gemini-2.0-flash') {
       this.apiKey = apiKey;
-      this.model = model;
+      this.model = model || 'gemini-2.0-flash';
     }
 
     setApiKey(key) {
@@ -423,29 +423,21 @@
     }
 
     getSystemPrompt() {
-      return `أنت خبير ذكاء اصطناعي متخصص في فرز وتحليل مكالمات حجز الرعاية الصحية والطبية المنزلية في المملكة العربية السعودية (Saudi Home Healthcare Call Center Copilot).
-مهمتك هي الاستماع لمحادثة المكالمة بالعامية السعودية (النجدية، الحجازية، الشرقية، الجنوبية) أو الفصحى واستخراج بيانات الحجز الطبية واللوجستية بدقة متناهية وإرجاع كائن JSON حصراً.
+      return `أنت خبير ذكاء اصطناعي متخصص في فرز وتحليل وتفريغ مكالمات حجز الرعاية الصحية والطبية المنزلية في المملكة العربية السعودية.
+مهمتك هي الاستماع لمحادثة المكالمة، وتفريغ نص المحادثة بالكامل، واستخراج بيانات الحجز الطبية واللوجستية بدقة متناهية وإرجاع كائن JSON حصراً.
 
 قواعد الاستخراج والتصنيف:
-1. اسم المريض (patient_name): استخرج اسم المريض المذكور في المكالمة (مثلاً الوالد أبو فهد، أم خالد، الأستاذ عبد الله الغامدي، الطفلة نورة...). إذا لم يُذكر، اكتب "غير محدد".
-2. نوع الخدمة (service_type): اختر واحدة من القيم التالية بدقة:
-   - "تمريض منزلي"
-   - "زيارة طبيب"
-   - "إسعاف وطوارئ"
-   - "علاج طبيعي"
-   - "سحب عينات ومختبر"
-   - "رعاية كبار السن"
-   - "أشعة وفحوصات منزلية"
-3. المنطقة / الحي (district): استخرج المدينة والحي والشارع والمعالم المذكورة في السعودية (مثل: الرياض حي النرجس، جدة حي الشاطئ، الخبر حي الحزام الذهبي، الدمام...).
-4. الموعد المقترح (preferred_time): استخرج التوقيت المفضل للزيارة (مثل: اليوم بعد صلاة العصر، غداً 7:30 صباحاً صائم، عاجل وفوراً...).
-5. ملاحظات الحالة والطلب الطبي (medical_notes): صِغ ملخصاً طبياً واضحاً يوضح شكوى المريض، الأعراض، الإجراء التمريضي أو الطبي المطلوب، والتاريخ المرضي باختصار وافٍ.
-6. درجة الاستعجال (urgency_level): صنف الحالة بدقة إلى واحدة من:
-   - "طوارئ قصوى": (ألم صدر حاد، اشتباه جلطة، صعوبة تنفس حادة، نزيف حاد، فقدان وعي).
-   - "عاجل": (حمى شديدة وقيء متكرر للأطفال، ألم شديد مستمر، إعياء وخمول حاد).
-   - "عادي": (غيار روتيني، سحب عينات دورية، كشف غير طارئ، علاج طبيعي مجدول).
+1. call_transcript: التفريغ النصي الكامل والدقيق.
+2. patient_name: اسم المريض.
+3. service_type: نوع الخدمة (تمريض منزلي، زيارة طبيب، علاج طبيعي، سحب عينات ومختبر، رعاية كبار السن، أشعة وفحوصات منزلية).
+4. district: المدينة والحي.
+5. preferred_time: التوقيت المفضل.
+6. medical_notes: ملخص طبي.
+7. urgency_level: (طوارئ قصوى، عاجل، عادي).
 
 يجب أن يكون الرد عبارة عن كائن JSON فقط بالبنية التالية:
 {
+  "call_transcript": "...",
   "patient_name": "...",
   "service_type": "...",
   "district": "...",
@@ -457,101 +449,104 @@
 
     async extractEntities(transcript) {
       if (!transcript || transcript.trim().length < 5) {
-        throw new Error('نص المكالمة قصير جداً أو فارغ لاستخراج البيانات');
+        throw new Error('نص المكالمة قصير جداً أو فارغ');
       }
 
       if (!this.apiKey) {
         return this.offlineFallbackExtract(transcript);
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-      const requestBody = {
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `إليك نص المكالمة الواردة لمركز خدمة العملاء في السعودية:\n"""\n${transcript}\n"""\nاستخرج بيانات الحجز الطبية بصيغة JSON.` }]
+      const candidateModels = [this.model, 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+      const uniqueModels = [...new Set(candidateModels.filter(Boolean))];
+      let lastError = null;
+
+      for (const currentModel of uniqueModels) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${this.apiKey}`;
+          const requestBody = {
+            contents: [{ role: 'user', parts: [{ text: `إليك نص المكالمة الواردة لمركز خدمة العملاء في السعودية:\n"""\n${transcript}\n"""\nاستخرج بيانات الحجز الطبية بصيغة JSON.` }] }],
+            systemInstruction: { parts: [{ text: this.getSystemPrompt() }] },
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.1, maxOutputTokens: 1000 }
+          };
+
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `HTTP ${response.status}`);
           }
-        ],
-        systemInstruction: { parts: [{ text: this.getSystemPrompt() }] },
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.1,
-          maxOutputTokens: 1000
+
+          const data = await response.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) throw new Error('لم يتم استلام نص من نموذج الذكاء الاصطناعي');
+
+          this.model = currentModel;
+          return this.cleanAndParseJSON(rawText);
+        } catch (err) {
+          console.warn(`Model ${currentModel} error:`, err.message);
+          lastError = err;
         }
-      };
-
-      try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!rawText) throw new Error('لم يتم استلام نص من نموذج الذكاء الاصطناعي');
-
-        return this.cleanAndParseJSON(rawText);
-      } catch (err) {
-        console.warn('API error, falling back to local extractor:', err);
-        const fallback = this.offlineFallbackExtract(transcript);
-        fallback._warning = `تم الاستخراج بالمحرك الاحتياطي (${err.message})`;
-        return fallback;
       }
+
+      const fallback = this.offlineFallbackExtract(transcript);
+      fallback._warning = `تم الاستخراج بالمحرك الاحتياطي (${lastError?.message || ''})`;
+      return fallback;
     }
 
-    async extractFromAudioFile(base64Audio, mimeType = 'audio/wav') {
+    async extractFromAudioFile(base64Audio, mimeType = 'audio/mp3') {
       if (!this.apiKey) {
-        throw new Error('لاستخراج البيانات مباشرة من ملف تسجيل المكالمة، يرجى إدخال مفتاح Gemini API في الإعدادات أولاً.');
+        throw new Error('لاستخراج البيانات مباشرة من ملف تسجيل المكالمة، يرجى إدخال مفتاح Gemini API في الإعدادات (⚙️) أولاً.');
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-      const requestBody = {
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                inlineData: {
-                  mimeType: mimeType,
-                  data: base64Audio
-                }
-              },
-              {
-                text: `استمع لهذا التسجيل الصوتي لمكالمة حجز رعاية صحية منزلية بالسعودية (بين الموظف والعميل في MicroSIP)، وفرّغ المحادثة واستخرج بيانات الحجز الطبية بالكامل بصيغة JSON.`
-              }
-            ]
+      let cleanMime = mimeType;
+      if (mimeType === 'audio/mp3' || mimeType.includes('mpeg') || mimeType.includes('mp3')) cleanMime = 'audio/mp3';
+      else if (mimeType.includes('wav')) cleanMime = 'audio/wav';
+      else if (mimeType.includes('ogg')) cleanMime = 'audio/ogg';
+
+      const candidateModels = [this.model, 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+      const uniqueModels = [...new Set(candidateModels.filter(Boolean))];
+      let lastError = null;
+
+      for (const currentModel of uniqueModels) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${this.apiKey}`;
+          const requestBody = {
+            contents: [{
+              role: 'user',
+              parts: [{ inlineData: { mimeType: cleanMime, data: base64Audio } }, { text: `استمع لهذا التسجيل الصوتي لمكالمة حجز رعاية صحية منزلية بالسعودية، وفرّغ المحادثة واستخرج بيانات الحجز الطبية بالكامل بصيغة JSON.` }]
+            }],
+            systemInstruction: { parts: [{ text: this.getSystemPrompt() }] },
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.1, maxOutputTokens: 1500 }
+          };
+
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `HTTP ${response.status}`);
           }
-        ],
-        systemInstruction: { parts: [{ text: this.getSystemPrompt() }] },
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.1,
-          maxOutputTokens: 1000
+
+          const data = await response.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) throw new Error('لم يتم استلام رد من النموذج لتحليل الملف الصوتي');
+
+          this.model = currentModel;
+          return this.cleanAndParseJSON(rawText);
+        } catch (err) {
+          console.warn(`Model ${currentModel} audio extract failed:`, err.message);
+          lastError = err;
         }
-      };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `HTTP ${response.status}`);
       }
 
-      const data = await response.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) throw new Error('لم يتم استلام رد من النموذج لتحليل الملف الصوتي');
-
-      return this.cleanAndParseJSON(rawText);
+      throw new Error(lastError?.message || 'فشلت معالجة الملف الصوتي على جميع نماذج Gemini المتاحة');
     }
 
     cleanAndParseJSON(rawText) {
@@ -568,11 +563,8 @@
     offlineFallbackExtract(transcript) {
       const text = transcript.toLowerCase();
       let urgency = 'عادي';
-      if (/طوارئ|جلطة|ما يقدر يتنفس|ألم بالصدر|صدره|سكتة|غيبوبة|عرق بارد|نزيف|الحقونا|تكفون|فورا|الحين/.test(text)) {
-        urgency = 'طوارئ قصوى';
-      } else if (/عاجل|سخونة|حرارة|ترجيع|تعبان|الم شديد|خمول|طريح فراش|وجع/.test(text)) {
-        urgency = 'عاجل';
-      }
+      if (/طوارئ|جلطة|ما يقدر يتنفس|ألم بالصدر|صدره|سكتة|غيبوبة|عرق بارد|نزيف|الحقونا|تكفون|فورا|الحين/.test(text)) urgency = 'طوارئ قصوى';
+      else if (/عاجل|سخونة|حرارة|ترجيع|تعبان|الم شديد|خمول|طريح فراش|وجع/.test(text)) urgency = 'عاجل';
 
       let service = 'تمريض منزلي';
       if (/طوارئ|إسعاف|اسعاف|عربية اسعاف|نقل طبي/.test(text)) service = 'إسعاف وطوارئ';
@@ -582,45 +574,20 @@
       else if (/اشعة|أشعة|سونار|تخطيط قلب|رسم قلب|ecg/.test(text)) service = 'أشعة وفحوصات منزلية';
       else if (/كبار السن|مسنين|جليس|رعاية كبار/.test(text)) service = 'رعاية كبار السن';
 
-      const saudiLocations = [
-        'الرياض - حي النرجس', 'الرياض - حي الملقا', 'الرياض - حي الياسمين', 'الرياض - حي العليا',
-        'الرياض - حي الصحافة', 'الرياض - حي الروضة', 'الرياض - حي السليمانية', 'الرياض - حي حطين',
-        'جدة - حي الشاطئ', 'جدة - حي الروضة', 'جدة - حي الحمراء', 'جدة - حي الصفا', 'جدة - حي السلامة',
-        'الخبر - حي الحزام الذهبي', 'الخبر - حي الراكة', 'الخبر - حي العقربية',
-        'الدمام - حي الشاطئ', 'الدمام - حي الفيصلية', 'مكة المكرمة', 'المدينة المنورة', 'الرياض', 'جدة', 'الخبر', 'الدمام'
-      ];
+      const saudiLocations = ['الرياض', 'جدة', 'الخبر', 'الدمام', 'مكة', 'المدينة'];
       let district = 'المملكة العربية السعودية';
-      for (const loc of saudiLocations) {
-        if (text.includes(loc.toLowerCase())) {
-          district = loc;
-          break;
-        }
-      }
+      for (const loc of saudiLocations) { if (text.includes(loc.toLowerCase())) district = loc; }
 
       let patientName = 'غير محدد';
-      const namePatterns = [
-        /(?:الوالد|الوالدة|أبو|ابو|أم|ام|أستاذ|استاذ|الشيخ|الأخ|الأخت|بنتي|ولدي|المريض)\s+([^\s,،.]+)/i,
-        /(?:اسمه|اسمها|لـ|للأستاذ|للشيخ)\s+([^\s,،.]+)/i
-      ];
-      for (const pat of namePatterns) {
-        const match = transcript.match(pat);
-        if (match && match[0]) {
-          patientName = match[0].trim();
-          break;
-        }
-      }
+      const match = transcript.match(/(?:الوالد|الوالدة|أبو|أم|مريض)\s+([^\s,،.]+)/i);
+      if (match) patientName = match[0].trim();
 
       let preferredTime = 'اليوم في أقرب وقت متاح';
-      if (/اليوم/.test(text)) {
-        const timeMatch = text.match(/(?:الساعة|حوالي|بعد صلاة|بعد)\s*(\d+|العصر|المغرب|الظهر|العشاء|الصبح)/i);
-        preferredTime = timeMatch ? `اليوم ${timeMatch[0]}` : 'اليوم';
-      } else if (/بكرة|غداً|غدا/.test(text)) {
-        preferredTime = 'غداً صباحاً';
-      } else if (urgency === 'طوارئ قصوى') {
-        preferredTime = 'عاجل جداً وفوراً (الآن)';
-      }
+      if (/بكرة|غداً|غدا/.test(text)) preferredTime = 'غداً صباحاً';
+      else if (urgency === 'طوارئ قصوى') preferredTime = 'عاجل جداً وفوراً (الآن)';
 
       return {
+        call_transcript: transcript,
         patient_name: patientName,
         service_type: service,
         district: district,
@@ -1563,6 +1530,12 @@
 
     populateForm(data) {
       this.currentBooking = { ...this.currentBooking, ...data };
+
+      if (data.call_transcript && data.call_transcript.trim()) {
+        this.transcriptBox.value = data.call_transcript.trim();
+        this.speech.setTranscript(data.call_transcript.trim());
+        this.updateWordCount(data.call_transcript.trim());
+      }
 
       this.fieldPatientName.value = data.patient_name || '';
       this.fieldServiceType.value = data.service_type || 'تمريض منزلي';
