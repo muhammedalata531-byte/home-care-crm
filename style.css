@@ -1,0 +1,177 @@
+/* HomeCare AI Copilot - Modern Clinical Design System */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
+
+:root {
+  --font-arabic: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+  --bg-main: #0b0f19;
+  --card-bg: #111827;
+  --card-border: #1f2937;
+  --primary-emerald: #10b981;
+  --emergency-rose: #f43f5e;
+  --urgent-amber: #f59e0b;
+}
+
+body {
+  font-family: var(--font-arabic);
+  background-color: var(--bg-main);
+  color: #f3f4f6;
+  direction: rtl;
+  text-align: right;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* Enable text selection on inputs and transcripts */
+input, textarea, .selectable-text {
+  user-select: text;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.6);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.6);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Pulse Wave Animations */
+@keyframes mic-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.mic-active {
+  animation: mic-pulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes green-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.extract-active {
+  animation: green-pulse 1.4s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+/* Glow effects */
+.glow-emerald {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.4);
+}
+
+.glow-rose {
+  box-shadow: 0 0 20px -5px rgba(244, 63, 94, 0.5);
+}
+
+/* Live Waveform Canvas */
+.waveform-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+}
+
+.wave-bar {
+  width: 3px;
+  background-color: #10b981;
+  border-radius: 3px;
+  transition: height 0.08s ease;
+  min-height: 4px;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-header {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Compact Side-by-Side Docking Container */
+.copilot-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Split Simulation Mode */
+.sim-crm-panel {
+  background: #0f172a;
+  border-right: 1px solid #1e293b;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth Form Field Highlights */
+.field-updated {
+  animation: highlight-field 1s ease;
+}
+
+@keyframes highlight-field {
+  0% {
+    background-color: rgba(16, 185, 129, 0.25);
+    border-color: #10b981;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Urgency Color Badge Styles */
+.badge-emergency {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.25), rgba(159, 18, 57, 0.4));
+  border: 1px solid rgba(244, 63, 94, 0.6);
+  color: #fecdd3;
+}
+
+.badge-urgent {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.25), rgba(180, 83, 9, 0.4));
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  color: #fde68a;
+}
+
+.badge-normal {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.25), rgba(4, 120, 87, 0.4));
+  border: 1px solid rgba(16, 185, 129, 0.6);
+  color: #a7f3d0;
+}
+
+/* Keyboard Shortcut Tooltips */
+.kbd-shortcut {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #cbd5e1;
+}

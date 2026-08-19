@@ -1,0 +1,21 @@
+{
+  "name": "homecare-ai-copilot-ksa",
+  "version": "1.0.0",
+  "description": "HomeCare AI Copilot - Saudi Arabia Healthcare VoIP Booking Assistant with Google Gemini AI",
+  "main": "index.html",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File server.ps1"
+  },
+  "keywords": [
+    "homecare",
+    "healthcare",
+    "call-center",
+    "voip",
+    "microsip",
+    "gemini-ai",
+    "saudi-arabia",
+    "speech-recognition"
+  ],
+  "author": "Google DeepMind & Antigravity",
+  "license": "MIT"
+}

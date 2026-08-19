@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeCare AI Copilot | مساعد حجز الرعاية المنزلية الذكي - السعودية 🇸🇦</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+              950: '#022c22'
+            },
+            clinical: {
+              bg: '#0b0f19',
+              surface: '#111827',
+              surface2: '#1e293b',
+              border: '#334155'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'Tajawal', 'sans-serif'],
+            tajawal: ['Tajawal', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-cairo antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Helper Banner for file:// Protocol -->
+  <div id="protocol-warning-banner" class="hidden bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 border-b border-amber-500/40 px-4 py-2 text-xs text-amber-200 text-center flex items-center justify-between">
+    <div class="max-w-5xl mx-auto flex items-center gap-2">
+      <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0"></i>
+      <span>
+        <strong>تلميح الميكروفون المباشر:</strong> لتفعيل الميكروفون الحقيقي المستمر، يرجى تشغيل المساعد بالنقر على ملف <code class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">run.bat</code> وفتح الرابط <a href="http://localhost:5000" class="underline text-white font-bold">http://localhost:5000</a>!
+      </span>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-amber-400 hover:text-white p-1">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="glass-header sticky top-0 z-40 px-4 py-2.5 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+          <i data-lucide="stethoscope" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-white tracking-wide">HomeCare AI Copilot</h1>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold flex items-center gap-1">
+              <span>🇸🇦 خدمة عملاء السعودية</span>
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">مساعد استخراج بيانات المكالمات وتسهيل الحجز للـ CRM</p>
+        </div>
+      </div>
+
+      <!-- Live Status Pill, Call Timer & Audio Wave -->
+      <div class="flex items-center gap-3">
+        <div id="status-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-medium text-slate-300 shadow-inner">
+          <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span id="status-text">جاهز للاستماع</span>
+          <span id="call-timer-display" class="font-mono text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/80 text-[11px]">00:00</span>
+          <div id="audio-wave" class="waveform-container hidden mr-1">
+            <div class="wave-bar" style="height: 6px;"></div>
+            <div class="wave-bar" style="height: 12px;"></div>
+            <div class="wave-bar" style="height: 18px;"></div>
+            <div class="wave-bar" style="height: 10px;"></div>
+            <div class="wave-bar" style="height: 14px;"></div>
+          </div>
+        </div>
+
+        <!-- MicroSIP Guide Quick Button -->
+        <button id="microsip-guide-btn" title="دليل ربط صوت المتصل من MicroSIP" class="px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">ربط صوت MicroSIP</span>
+        </button>
+
+        <!-- API Key Quick Status Pill -->
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-lg text-xs">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span class="text-slate-400">Gemini:</span>
+          <span id="api-key-indicator" class="font-mono text-emerald-400">نشط</span>
+          <button id="quick-key-btn" title="تعديل مفتاح API" class="text-slate-400 hover:text-white mr-1 p-0.5">
+            <i data-lucide="edit-2" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <!-- Action Icons: CRM Simulator Toggle, Sound, History, Settings -->
+        <div class="flex items-center gap-1.5">
+          <button id="toggle-split-btn" title="معاينة محاكاة الشاشة المقسمة مع الـ CRM" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5 text-xs">
+            <i data-lucide="columns-2" class="w-4 h-4"></i>
+            <span class="hidden lg:inline">محاكاة الـ CRM</span>
+          </button>
+
+          <button id="history-drawer-btn" title="سجل الحجوزات السابقة" class="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+            <i data-lucide="history" class="w-4 h-4"></i>
+            <span id="history-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+          </button>
+
+          <button id="toggle-sound-btn" title="كتم/تفعيل الأصوات" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+            <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
+          </button>
+
+          <button id="settings-btn" title="الإعدادات ومفتاح API" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Split View Wrapper (Normal mode vs CRM Simulator mode) -->
+  <div id="main-wrapper" class="flex-1 flex overflow-hidden">
+    
+    <!-- CRM Simulator Left Pane (Toggled via button) -->
+    <div id="crm-simulator-pane" class="hidden w-1/2 border-l border-slate-800 bg-[#0f172a] p-4 flex-col overflow-y-auto font-sans">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl mb-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+            <span class="text-xs font-semibold text-slate-400 mr-2 font-mono">MicroSIP & CRM Simulator (KSA)</span>
+          </div>
+          <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">Call Active (02:14)</span>
+        </div>
+
+        <!-- Simulated CRM Form Target -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+            حقل استلام بيانات الحجز في نظام الـ CRM
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            عند الضغط على <strong>"نسخ بيانات الحجز للـ CRM"</strong> أو استخدام <span class="kbd-shortcut">Ctrl+Shift+C</span>، يمكنك لصق النص مباشرة في الـ CRM هنا:
+          </p>
+          <textarea id="crm-sim-paste-box" dir="rtl" rows="8" placeholder="قم باللصق هنا (Ctrl+V) لاختبار النتيجة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-emerald-300 font-mono focus:border-cyan-500 focus:outline-none resize-none"></textarea>
+          <button id="crm-sim-clear-btn" class="text-xs text-slate-500 hover:text-slate-300 underline">مسح محتوى الـ CRM</button>
+        </div>
+      </div>
+
+      <!-- Simulated VoIP MicroSIP Widget -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 mt-auto">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700 flex items-center justify-center text-cyan-400">
+              <i data-lucide="phone-call" class="w-4 h-4 animate-pulse"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-200">Inbound Call: +966 50 123 4567</div>
+              <div class="text-[10px] text-slate-400">MicroSIP Saudi VoIP Line (G.711a)</div>
+            </div>
+          </div>
+          <span class="text-xs text-emerald-400 font-mono">03:42</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Copilot Application Body -->
+    <main id="copilot-main" class="flex-1 flex flex-col max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 overflow-y-auto">
+      
+      <!-- Top Presets & Micro Controls Bar -->
+      <div class="glass-panel rounded-2xl p-3 mb-4 flex flex-wrap items-center justify-between gap-3">
+        <!-- Preset Call Selector -->
+        <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-xs font-semibold text-slate-300 whitespace-nowrap">محاكاة مكالمة سريعة:</span>
+          <select id="preset-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-200 focus:border-emerald-500 focus:outline-none flex-1">
+            <option value="">-- اختر سيناريو مكالمة سعودية للتجربة --</option>
+          </select>
+          <button id="play-preset-btn" title="تشغيل المحاكاة الصوتية والنصية" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>تشغيل</span>
+          </button>
+        </div>
+
+        <!-- MicroSIP Live Ingestion Quick Button -->
+        <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-800/60 px-3 py-1.5 rounded-xl text-xs">
+          <div class="flex items-center gap-1.5 text-cyan-300 font-bold">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span>MicroSIP Bridge</span>
+          </div>
+          <button id="fetch-latest-call-btn" title="جلب وتفريغ آخر مكالمة تم إنهاؤها في MicroSIP مباشرة" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow">
+            <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
+            <span>جلب آخر مكالمة من MicroSIP 📥</span>
+          </button>
+        </div>
+
+        <!-- Keyboard Shortcuts Helper Badge -->
+        <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400">
+          <span>اختصارات:</span>
+          <span><span class="kbd-shortcut">Space</span> مايك</span>
+          <span><span class="kbd-shortcut">Ctrl+Enter</span> استخراج ذكي</span>
+          <span><span class="kbd-shortcut">Ctrl+Shift+C</span> نسخ CRM</span>
+        </div>
+      </div>
+
+      <!-- Core 2-Column Responsive Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- RIGHT PANEL (In RTL = Right column): Speech Recognition & Live Transcription -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+          
+          <!-- Speech Audio Capture Card -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col border border-slate-800 relative overflow-hidden">
+            
+            <!-- Card Header & Audio Source Selector -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
+                <h2 class="text-sm font-bold text-slate-200">التقاط المحادثة الصوتية</h2>
+              </div>
+              
+              <!-- Audio Source Selector Pills -->
+              <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800 text-[11px]">
+                <button id="src-mic-btn" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-medium transition">مايك</button>
+                <button id="src-dual-btn" title="دمج صوت المايك مع صوت المتصل القادم من MicroSIP عبر مشاركة صوت النظام" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition flex items-center gap-1">
+                  <i data-lucide="headphones" class="w-3 h-3"></i>
+                  <span>مايك + MicroSIP</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Big Mic Trigger Button & Direct Audio File Upload Option -->
+            <div class="flex flex-col items-center justify-center py-4 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-3 relative">
+              
+              <button id="mic-toggle-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 hover:from-emerald-600 hover:to-teal-500 text-white flex flex-col items-center justify-center shadow-xl transition-all duration-300 transform active:scale-95 group focus:outline-none border-2 border-slate-600 hover:border-emerald-400">
+                <i id="mic-icon" data-lucide="mic" class="w-8 h-8 group-hover:scale-110 transition-transform"></i>
+              </button>
+              <div class="mt-2.5 text-center">
+                <div id="mic-label" class="text-xs font-bold text-slate-200">انقر لبدء الاستماع للمكالمة</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">استماع مستمر للطرفين (الموظف والمتصل) • <span class="kbd-shortcut">Space</span></div>
+              </div>
+
+              <!-- Upload / Drop Call Recording File from MicroSIP -->
+              <div class="mt-3 pt-2.5 border-t border-slate-800/80 w-full px-4 flex items-center justify-between text-xs">
+                <label class="cursor-pointer text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 text-[11px] font-semibold">
+                  <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                  <span>رفع تسجيل مكالمة من MicroSIP (.wav / .mp3)</span>
+                  <input type="file" id="audio-file-input" accept="audio/*" class="hidden">
+                </label>
+                <button id="microsip-help-link" class="text-slate-400 hover:text-slate-200 text-[11px] underline">كيف أربط الصوت؟</button>
+              </div>
+
+            </div>
+
+            <!-- Live Transcript Card & Editor -->
+            <div class="flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  نص المكالمة المباشر (التفريغ الصوتي للطرفين):
+                </label>
+                <div class="flex items-center gap-1">
+                  <span id="word-count" class="text-[10px] text-slate-500">0 كلمة</span>
+                  <button id="clear-transcript-btn" title="مسح النص" class="text-slate-400 hover:text-rose-400 p-1 text-xs transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Real-time Transcript Textarea -->
+              <div class="relative flex-1">
+                <textarea id="transcript-box" rows="7" placeholder="سيبدأ التفريغ الصوتي التلقائي فور تحدث العميل بالعامية السعودية... (يمكنك أيضاً كتابة أو لصق نص هنا مباشرة)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 leading-relaxed focus:border-emerald-500 focus:outline-none resize-y selectable-text"></textarea>
+                <div id="interim-text" class="text-xs text-emerald-400/80 italic mt-1 px-1 min-h-[16px]"></div>
+              </div>
+            </div>
+
+            <!-- Quick Medical Procedure Tags -->
+            <div class="mt-3 pt-3 border-t border-slate-800/80">
+              <div class="text-[11px] font-semibold text-slate-400 mb-1.5">إضافة إجراءات طبية سريعة للنص:</div>
+              <div id="quick-tags-container" class="flex flex-wrap gap-1.5">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Primary AI Extract Action Button -->
+            <div class="mt-4">
+              <button id="extract-btn" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition transform active:scale-[0.99] border border-emerald-400/30">
+                <i data-lucide="sparkles" class="w-4 h-4 animate-spin-slow"></i>
+                <span id="extract-btn-text">استخراج وتحديث البيانات (Gemini AI)</span>
+                <span class="kbd-shortcut mr-auto bg-black/20 border-white/20">Ctrl+Enter</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- LEFT PANEL: Structured Clinical Booking Form (Editable) & 1-Click Copy Actions -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+          
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col border border-slate-800 shadow-xl">
+            
+            <!-- Section Header & Urgency Triage Badge Indicator -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-100">بيانات الحجز المستخرجة</h2>
+                  <p class="text-[11px] text-slate-400">محققة ومجهزة للمراجعة والنسخ الفوري للـ CRM</p>
+                </div>
+              </div>
+
+              <!-- Triage Urgency Badge Indicator -->
+              <div id="urgency-badge-display" class="badge-normal px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="urgency-badge-text">تصنيف الحالة: عادي</span>
+              </div>
+            </div>
+
+            <!-- Booking Form Fields (2-Column Responsive Layout) -->
+            <form id="booking-form" class="space-y-3.5" onsubmit="event.preventDefault()">
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- Patient Name -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    اسم المريض / المتصل:
+                  </label>
+                  <input type="text" id="field-patient-name" placeholder="مثال: الوالد أبو فهد / عبد الله الغامدي" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                </div>
+
+                <!-- Service Type -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="activity" class="w-3.5 h-3.5 text-teal-400"></i>
+                    نوع الخدمة المطلوبة:
+                  </label>
+                  <select id="field-service-type" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                    <option value="تمريض منزلي">تمريض منزلي (غيار جروح، قرح سكري، محاليل، إبر...)</option>
+                    <option value="زيارة طبيب">زيارة طبيب (كشف باطنة، كبار سن، أطفال، عظام...)</option>
+                    <option value="إسعاف وطوارئ">إسعاف وطوارئ (حالات حرجة، نقل إسعافي)</option>
+                    <option value="علاج طبيعي">علاج طبيعي وتأهيل حركي وعصبي</option>
+                    <option value="سحب عينات ومختبر">سحب عينات ومختبر منزلي شامل</option>
+                    <option value="رعاية كبار السن">رعاية كبار السن ومرافق تمريضي</option>
+                    <option value="أشعة وفحوصات منزلية">أشعة وفحوصات منزلية (تخطيط قلب ECG، سونار)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- District / Area -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i>
+                    المدينة / الحي والعنوان:
+                  </label>
+                  <input type="text" id="field-district" placeholder="مثال: الرياض - حي النرجس / جدة - حي الشاطئ" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                </div>
+
+                <!-- Preferred Time -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                    الموعد المقترح للزيارة:
+                  </label>
+                  <input type="text" id="field-preferred-time" placeholder="مثال: اليوم بعد صلاة العصر (4:30 عصراً)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                </div>
+              </div>
+
+              <!-- Medical Notes & Clinical Request -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                  <i data-lucide="file-heart" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  ملاحظات الحالة والطلب الطبي (التشخيص / الإجراء / الأعراض):
+                </label>
+                <textarea id="field-medical-notes" rows="3" placeholder="مثال: مريض سكري وضغط طريح فراش، مطلوب غيار على قرحة قدم سكري وتعقيم الجرح وقياس المؤشرات الحيوية..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none leading-relaxed transition resize-y"></textarea>
+              </div>
+
+              <!-- Urgency Selection Buttons -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+                  درجة الاستعجال والفرز الطبي:
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" data-urgency="عادي" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-emerald-500/50 bg-emerald-950/40 text-emerald-300">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                    <span>عادي</span>
+                  </button>
+                  <button type="button" data-urgency="عاجل" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-amber-300">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                    <span>عاجل</span>
+                  </button>
+                  <button type="button" data-urgency="طوارئ قصوى" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-rose-400">
+                    <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+                    <span>طوارئ قصوى</span>
+                  </button>
+                </div>
+              </div>
+
+            </form>
+
+            <!-- HIGH PRIORITY 1-CLICK ACTION BUTTONS -->
+            <div class="mt-6 pt-4 border-t border-slate-800 space-y-2.5">
+              
+              <!-- Primary Action: Copy for CRM -->
+              <button id="copy-crm-btn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/80 transition transform active:scale-[0.99] border border-emerald-400/40">
+                <i data-lucide="copy" class="w-5 h-5"></i>
+                <span>نسخ بيانات الحجز للـ CRM</span>
+                <span class="kbd-shortcut mr-auto bg-emerald-900/60 border-emerald-400/40 text-emerald-100">Ctrl+Shift+C</span>
+              </button>
+
+              <!-- Secondary Action: Copy WhatsApp Location Template -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button id="copy-whatsapp-btn" class="w-full py-2.5 px-3 rounded-xl bg-teal-950 hover:bg-teal-900 text-teal-200 border border-teal-700/50 font-semibold text-xs flex items-center justify-center gap-2 transition">
+                  <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+                  <span>نسخ رسالة تأكيد الواتساب</span>
+                  <span class="kbd-shortcut bg-teal-900/80 border-teal-600/40 text-[10px]">Ctrl+Shift+W</span>
+                </button>
+
+                <!-- Reset Form for New Call -->
+                <button id="reset-form-btn" class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition">
+                  <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-400"></i>
+                  <span>تفريغ الحقول لحجز جديد</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- MICROSIP AUDIO SETUP GUIDE MODAL -->
+  <div id="microsip-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl p-5 sm:p-6 text-right max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <i data-lucide="headphones" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">كيفية التقاط صوت المتصل من MicroSIP 🎧</h3>
+            <p class="text-xs text-slate-400">دليل ربط صوت العميل الداخلي مع المساعد الذكي</p>
+          </div>
+        </div>
+        <button id="close-microsip-btn" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        
+        <!-- Explanation Note -->
+        <div class="p-3 bg-cyan-950/40 border border-cyan-700/40 rounded-xl text-cyan-200 text-xs">
+          <strong>لماذا لا يظهر صوت العميل تلقائياً؟</strong><br>
+          الميكروفون الافتراضي في ويندوز يلتقط صوتك أنت فقط عبر سماعة الرأس، بينما صوت العميل يخرج في السماعات (Audio Output). لجعل الذكاء الاصطناعي يستمع للطرفين، اختر إحدى الطرق السهلة التالية:
+        </div>
+
+        <!-- Method 1 -->
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+          <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs">1</span>
+            <span>الطريقة الأولى: مشاركة صوت النظام الفورية (مستحسنة وبدون برامج)</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            1. اضغط على زر <strong>"مايك + MicroSIP"</strong> في الأعلى.<br>
+            2. ستظهر نافذة من المتصفح؛ اختر <strong>"كامل الشاشة (Entire Screen)"</strong> أو <strong>"نافذة MicroSIP"</strong>.<br>
+            3. <strong>هام جداً:</strong> ضع علامة صح ✅ على خيار <strong>"Also share system audio / مشاركة صوت النظام"</strong> في أسفل النافذة ثم اضغط مشاركة.<br>
+            4. سيتم فوراً دمج صوت العميل مع صوتك في بث صوتي واحد يستمع له المساعد!
+          </p>
+        </div>
+
+        <!-- Method 2 -->
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+          <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-xs">2</span>
+            <span>الطريقة الثانية: تفعيل Stereo Mix (مزيج الاستريو في ويندوز)</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            1. افتح إعدادات الصوت في ويندوز <strong>Sound Settings -> More sound settings -> Recording</strong>.<br>
+            2. انقر بالزر الأيمن على <strong>Stereo Mix (مزيج الاستريو)</strong> واختر <strong>Enable (تفعيل)</strong>.<br>
+            3. يصبح متصفحك قادراً على الاستماع لكامل مخرجات صوت الكمبيوتر بما فيها MicroSIP مباشرة.
+          </p>
+        </div>
+
+        <!-- Method 3 -->
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+          <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-xs">3</span>
+            <span>الطريقة الثالثة: سحب ملف تسجيل المكالمة من MicroSIP مباشرة</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            في MicroSIP، يمكنك النقر على زر <strong>Record</strong> لحفظ المكالمة كملف <code class="text-cyan-300">.wav</code>. ثم اضغط على <strong>"رفع تسجيل مكالمة من MicroSIP"</strong> في التطبيق ليقوم Gemini بالاستماع للملف الصوتي وتفريغه واستخراجه في ثانية واحدة!
+          </p>
+        </div>
+
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-800 flex justify-end">
+        <button id="close-microsip-btn-2" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-lg transition">
+          فهمت ذلك، شكراً!
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HISTORY DRAWER (SLIDE-OVER) -->
+  <div id="history-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div id="history-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0"></div>
+    <div class="fixed inset-y-0 left-0 max-w-full flex">
+      <div id="history-panel" class="w-screen max-w-md bg-[#111827] border-r border-slate-800 shadow-2xl p-5 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out">
+        
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <i data-lucide="history" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-100">سجل الحجوزات السابقة</h3>
+              <p class="text-xs text-slate-400">آخر 20 مكالمة مسجلة في خدمة العملاء</p>
+            </div>
+          </div>
+          <button id="close-history-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Actions -->
+        <div class="flex items-center justify-between py-3 border-b border-slate-800/80 text-xs">
+          <button id="export-history-btn" class="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>تصدير JSON</span>
+          </button>
+          <button id="clear-all-history-btn" class="flex items-center gap-1.5 text-rose-400 hover:text-rose-300 transition">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>مسح السجل بالكامل</span>
+          </button>
+        </div>
+
+        <!-- Bookings List -->
+        <div id="history-list" class="flex-1 overflow-y-auto py-3 space-y-3">
+          <div class="text-center py-10 text-slate-500 text-xs">لا توجد حجوزات مسجلة بعد</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-5 sm:p-6 text-right max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">إعدادات HomeCare AI Copilot</h3>
+            <p class="text-xs text-slate-400">تكوين محرك Gemini API وخيارات الفرز الصوتي (السعودية)</p>
+          </div>
+        </div>
+        <button id="close-settings-btn" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Settings Form -->
+      <div class="space-y-4 text-xs sm:text-sm">
+        
+        <!-- Gemini API Key -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-semibold text-slate-200">Google Gemini API Key:</label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-[11px] text-emerald-400 hover:underline flex items-center gap-1">
+              <span>الحصول على مفتاح مجاني</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+          <div class="relative">
+            <input type="password" id="setting-api-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-mono text-emerald-300 focus:border-emerald-500 focus:outline-none">
+            <button id="toggle-key-visibility" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">
+              <i id="key-vis-icon" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">يُحفظ المفتاح محلياً في متصفحك فقط (localStorage) لضمان سرية بيانات المرضى.</p>
+          <div class="mt-2 flex items-center gap-2">
+            <button id="test-api-key-btn" type="button" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-medium transition flex items-center gap-1.5">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>فحص صلاحية المفتاح</span>
+            </button>
+            <span id="test-key-status" class="text-xs"></span>
+          </div>
+        </div>
+
+        <!-- Model Selection -->
+        <div>
+          <label class="block font-semibold text-slate-200 mb-1">نموذج الذكاء الاصطناعي (Model):</label>
+          <select id="setting-model" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (سريع جداً وممتاز في اللهجة السعودية - مستحسن)</option>
+            <option value="gemini-3.7-flash">Gemini 3.7 Flash (أحدث إصدار فائق الذكاء)</option>
+            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (خفيف وفوري)</option>
+          </select>
+        </div>
+
+        <!-- Dialect Selection -->
+        <div>
+          <label class="block font-semibold text-slate-200 mb-1">لهجة التعرف الصوتي (Speech Dialect):</label>
+          <select id="setting-dialect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+            <option value="ar-SA">العربية (المملكة العربية السعودية - ar-SA) - افتراضي</option>
+            <option value="ar-EG">العربية (مصر - ar-EG)</option>
+            <option value="ar-XA">العربية الفصحى القياسية</option>
+          </select>
+        </div>
+
+        <!-- Toggles -->
+        <div class="pt-2 border-t border-slate-800 space-y-3">
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="font-semibold text-slate-200">استخراج تلقائي عند إنهاء المكالمة</div>
+              <div class="text-[11px] text-slate-400">استخراج وتحديث البيانات فور الضغط على إنهاء المكالمة</div>
+            </div>
+            <input type="checkbox" id="setting-auto-extract" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 bg-slate-900 border-slate-700">
+          </label>
+
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="font-semibold text-slate-200">التأثيرات الصوتية (Sound Feedback)</div>
+              <div class="text-[11px] text-slate-400">نغمات صوتية عند بدء/إيقاف المايك ونسخ البيانات</div>
+            </div>
+            <input type="checkbox" id="setting-sound" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 bg-slate-900 border-slate-700">
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="mt-6 pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button id="save-settings-btn" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950 transition">
+          حفظ التغييرات
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Unified Standalone Bundle (Zero CORS Restrictions) -->
+  <script src="bundle.js"></script>
+</body>
+</html>
