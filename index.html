@@ -46,373 +46,288 @@
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-cairo antialiased selection:bg-emerald-500 selection:text-white">
 
-  <!-- Top Helper Banner for file:// Protocol -->
-  <div id="protocol-warning-banner" class="hidden bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 border-b border-amber-500/40 px-4 py-2 text-xs text-amber-200 text-center flex items-center justify-between">
-    <div class="max-w-5xl mx-auto flex items-center gap-2">
-      <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0"></i>
-      <span>
-        <strong>تلميح الميكروفون المباشر:</strong> لتفعيل الميكروفون الحقيقي المستمر، يرجى تشغيل المساعد بالنقر على ملف <code class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">run.bat</code> وفتح الرابط <a href="http://localhost:5000" class="underline text-white font-bold">http://localhost:5000</a>!
-      </span>
-    </div>
-    <button onclick="this.parentElement.remove()" class="text-amber-400 hover:text-white p-1">
-      <i data-lucide="x" class="w-4 h-4"></i>
-    </button>
-  </div>
-
   <!-- Top Navbar -->
-  <header class="glass-header sticky top-0 z-40 px-4 py-2.5 border-b border-slate-800">
+  <header class="glass-header sticky top-0 z-40 px-4 py-2.5 border-b border-slate-800 bg-[#0a0f1d]/90 backdrop-blur-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       
       <!-- Brand & Title -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
-          <i data-lucide="stethoscope" class="w-5 h-5"></i>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+          <i data-lucide="cross" class="w-5 h-5"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold text-white tracking-wide">HomeCare AI Copilot</h1>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold flex items-center gap-1">
-              <span>🇸🇦 خدمة عملاء السعودية</span>
+            <h1 class="text-sm sm:text-base font-bold text-white tracking-wide">الرعاية الصحية المنزلية</h1>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">
+              HomeCare Copilot
             </span>
           </div>
-          <p class="text-xs text-slate-400">مساعد استخراج بيانات المكالمات وتسهيل الحجز للـ CRM</p>
+          <p class="text-[11px] text-slate-400">مساعد استخراج الحجوزات ونماذج الـ CRM والواتساب</p>
         </div>
       </div>
 
-      <!-- Live Status Pill, Call Timer & Audio Wave -->
-      <div class="flex items-center gap-3">
-        <div id="status-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-medium text-slate-300 shadow-inner">
-          <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span id="status-text">جاهز للاستماع</span>
-          <span id="call-timer-display" class="font-mono text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/80 text-[11px]">00:00</span>
-          <div id="audio-wave" class="waveform-container hidden mr-1">
-            <div class="wave-bar" style="height: 6px;"></div>
-            <div class="wave-bar" style="height: 12px;"></div>
-            <div class="wave-bar" style="height: 18px;"></div>
-            <div class="wave-bar" style="height: 10px;"></div>
-            <div class="wave-bar" style="height: 14px;"></div>
-          </div>
-        </div>
-
-        <!-- MicroSIP Guide Quick Button -->
-        <button id="microsip-guide-btn" title="دليل ربط صوت المتصل من MicroSIP" class="px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition">
-          <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">ربط صوت MicroSIP</span>
-        </button>
-
-        <!-- API Key Quick Status Pill -->
-        <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-lg text-xs">
+      <!-- Action Icons: History & Settings -->
+      <div class="flex items-center gap-2">
+        <!-- API Key Status Pill -->
+        <div class="hidden sm:flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 px-2.5 py-1 rounded-xl text-xs">
           <i data-lucide="key" class="w-3.5 h-3.5 text-slate-400"></i>
-          <span class="text-slate-400">Gemini:</span>
-          <span id="api-key-indicator" class="font-mono text-emerald-400">نشط</span>
+          <span id="api-key-indicator" class="font-mono text-emerald-400 text-xs">Gemini: نشط</span>
           <button id="quick-key-btn" title="تعديل مفتاح API" class="text-slate-400 hover:text-white mr-1 p-0.5">
             <i data-lucide="edit-2" class="w-3 h-3"></i>
           </button>
         </div>
 
-        <!-- Action Icons: CRM Simulator Toggle, Sound, History, Settings -->
-        <div class="flex items-center gap-1.5">
-          <button id="toggle-split-btn" title="معاينة محاكاة الشاشة المقسمة مع الـ CRM" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5 text-xs">
-            <i data-lucide="columns-2" class="w-4 h-4"></i>
-            <span class="hidden lg:inline">محاكاة الـ CRM</span>
-          </button>
+        <button id="history-drawer-btn" title="سجل الحجوزات السابقة" class="relative p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span id="history-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+        </button>
 
-          <button id="history-drawer-btn" title="سجل الحجوزات السابقة" class="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
-            <i data-lucide="history" class="w-4 h-4"></i>
-            <span id="history-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
-          </button>
-
-          <button id="toggle-sound-btn" title="كتم/تفعيل الأصوات" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
-            <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
-          </button>
-
-          <button id="settings-btn" title="الإعدادات ومفتاح API" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-          </button>
-        </div>
-
+        <button id="settings-btn" title="الإعدادات ومفتاح API" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
       </div>
+
     </div>
   </header>
 
-  <!-- Split View Wrapper (Normal mode vs CRM Simulator mode) -->
-  <div id="main-wrapper" class="flex-1 flex overflow-hidden">
-    
-    <!-- CRM Simulator Left Pane (Toggled via button) -->
-    <div id="crm-simulator-pane" class="hidden w-1/2 border-l border-slate-800 bg-[#0f172a] p-4 flex-col overflow-y-auto font-sans">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl mb-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
-            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
-            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span class="text-xs font-semibold text-slate-400 mr-2 font-mono">MicroSIP & CRM Simulator (KSA)</span>
-          </div>
-          <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">Call Active (02:14)</span>
-        </div>
-
-        <!-- Simulated CRM Form Target -->
-        <div class="space-y-3">
-          <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
-            حقل استلام بيانات الحجز في نظام الـ CRM
-          </h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            عند الضغط على <strong>"نسخ بيانات الحجز للـ CRM"</strong> أو استخدام <span class="kbd-shortcut">Ctrl+Shift+C</span>، يمكنك لصق النص مباشرة في الـ CRM هنا:
-          </p>
-          <textarea id="crm-sim-paste-box" dir="rtl" rows="8" placeholder="قم باللصق هنا (Ctrl+V) لاختبار النتيجة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-emerald-300 font-mono focus:border-cyan-500 focus:outline-none resize-none"></textarea>
-          <button id="crm-sim-clear-btn" class="text-xs text-slate-500 hover:text-slate-300 underline">مسح محتوى الـ CRM</button>
-        </div>
+  <!-- Main View Tab Switcher -->
+  <div id="main-tab-bar" class="sticky top-[52px] z-30 bg-[#080d1a]/95 backdrop-blur-md border-b border-slate-800/80 px-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between py-2">
+      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-0.5">
+        <button id="tab-assistant" class="main-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition bg-emerald-600 text-white shadow-lg shadow-emerald-950/60 whitespace-nowrap shrink-0">
+          <i data-lucide="bot" class="w-4 h-4 text-emerald-200"></i>
+          <span>وكيل العمل الذكي (Chat Assistant)</span>
+        </button>
+        <button id="tab-copilot" class="main-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800/80 whitespace-nowrap shrink-0">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>نموذج الحجز السريع</span>
+        </button>
+        <button id="tab-cstool" class="main-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800/80 whitespace-nowrap shrink-0">
+          <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+          <span>🧰 أدوات خدمة العملاء والأسعار</span>
+        </button>
       </div>
 
-      <!-- Simulated VoIP MicroSIP Widget -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 mt-auto">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700 flex items-center justify-center text-cyan-400">
-              <i data-lucide="phone-call" class="w-4 h-4 animate-pulse"></i>
-            </div>
-            <div>
-              <div class="text-xs font-bold text-slate-200">Inbound Call: +966 50 123 4567</div>
-              <div class="text-[10px] text-slate-400">MicroSIP Saudi VoIP Line (G.711a)</div>
-            </div>
-          </div>
-          <span class="text-xs text-emerald-400 font-mono">03:42</span>
-        </div>
+      <div class="hidden md:flex items-center gap-2">
+        <span class="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>جاهز للاستخراج والمحادثة الفورية</span>
+        </span>
       </div>
     </div>
+  </div>
 
-    <!-- Main Copilot Application Body -->
-    <main id="copilot-main" class="flex-1 flex flex-col max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 overflow-y-auto">
+  <!-- Split View Wrapper -->
+  <div id="main-wrapper" class="flex-1 flex overflow-hidden">
+    
+    <!-- Main Copilot Application Body (Quick Form Mode) -->
+    <main id="copilot-main" class="hidden flex-1 flex flex-col max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 overflow-y-auto">
       
-      <!-- Top Presets & Micro Controls Bar -->
-      <div class="glass-panel rounded-2xl p-3 mb-4 flex flex-wrap items-center justify-between gap-3">
-        <!-- Preset Call Selector -->
-        <div class="flex items-center gap-2 flex-1 min-w-[260px]">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          <span class="text-xs font-semibold text-slate-300 whitespace-nowrap">محاكاة مكالمة سريعة:</span>
-          <select id="preset-select" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-200 focus:border-emerald-500 focus:outline-none flex-1">
-            <option value="">-- اختر سيناريو مكالمة سعودية للتجربة --</option>
-          </select>
-          <button id="play-preset-btn" title="تشغيل المحاكاة الصوتية والنصية" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
-            <i data-lucide="play" class="w-3.5 h-3.5"></i>
-            <span>تشغيل</span>
-          </button>
-        </div>
-
-        <!-- MicroSIP Live Ingestion Quick Button -->
-        <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-800/60 px-3 py-1.5 rounded-xl text-xs">
-          <div class="flex items-center gap-1.5 text-cyan-300 font-bold">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span>MicroSIP Bridge</span>
-          </div>
-          <button id="fetch-latest-call-btn" title="جلب وتفريغ آخر مكالمة تم إنهاؤها في MicroSIP مباشرة" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow">
-            <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
-            <span>جلب آخر مكالمة من MicroSIP 📥</span>
-          </button>
-        </div>
-
-        <!-- Keyboard Shortcuts Helper Badge -->
-        <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-          <span>اختصارات:</span>
-          <span><span class="kbd-shortcut">Space</span> مايك</span>
-          <span><span class="kbd-shortcut">Ctrl+Enter</span> استخراج ذكي</span>
-          <span><span class="kbd-shortcut">Ctrl+Shift+C</span> نسخ CRM</span>
-        </div>
-      </div>
-
-      <!-- Core 2-Column Responsive Workspace -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+      <!-- Core 2-Column Clean Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 items-start">
         
-        <!-- RIGHT PANEL (In RTL = Right column): Speech Recognition & Live Transcription -->
+        <!-- RIGHT PANEL: Text Input & Call Audio Upload Card -->
         <div class="lg:col-span-5 flex flex-col gap-4">
-          
-          <!-- Speech Audio Capture Card -->
-          <div class="glass-panel rounded-2xl p-4 flex flex-col border border-slate-800 relative overflow-hidden">
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col border border-slate-800 shadow-xl space-y-3.5">
             
-            <!-- Card Header & Audio Source Selector -->
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
               <div class="flex items-center gap-2">
-                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
-                <h2 class="text-sm font-bold text-slate-200">التقاط المحادثة الصوتية</h2>
+                <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                  <i data-lucide="file-audio" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-slate-100">نص أو تسجيل مكالمة</h2>
+                  <p class="text-[11px] text-slate-400">الصق المحادثة أو ارفع ملف صوت المكالمة</p>
+                </div>
               </div>
-              
-              <!-- Audio Source Selector Pills -->
-              <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800 text-[11px]">
-                <button id="src-mic-btn" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-medium transition">مايك</button>
-                <button id="src-dual-btn" title="دمج صوت المايك مع صوت المتصل القادم من MicroSIP عبر مشاركة صوت النظام" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition flex items-center gap-1">
-                  <i data-lucide="headphones" class="w-3 h-3"></i>
-                  <span>مايك + MicroSIP</span>
+
+              <div class="flex items-center gap-1">
+                <span id="word-count" class="text-[10px] text-slate-500 font-mono">0 كلمة</span>
+                <button id="clear-transcript-btn" title="مسح النص" class="text-slate-400 hover:text-rose-400 p-1 text-xs transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
 
-            <!-- Big Mic Trigger Button & Direct Audio File Upload Option -->
-            <div class="flex flex-col items-center justify-center py-4 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-3 relative">
-              
-              <button id="mic-toggle-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 hover:from-emerald-600 hover:to-teal-500 text-white flex flex-col items-center justify-center shadow-xl transition-all duration-300 transform active:scale-95 group focus:outline-none border-2 border-slate-600 hover:border-emerald-400">
-                <i id="mic-icon" data-lucide="mic" class="w-8 h-8 group-hover:scale-110 transition-transform"></i>
+            <!-- Upload / Ingest Call Audio Toolbar -->
+            <div class="flex flex-wrap items-center gap-2 p-2 bg-slate-950/80 rounded-xl border border-slate-800">
+              <label for="audio-file-input" class="flex-1 cursor-pointer py-1.5 px-3 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-700/50 text-cyan-300 hover:text-cyan-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow">
+                <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                <span>🎙️ رفع تسجيل مكالمة (.wav/.mp3)</span>
+                <input type="file" id="audio-file-input" accept="audio/*" class="hidden">
+              </label>
+
+              <button type="button" id="fetch-latest-call-btn" title="جلب آخر مكالمة من MicroSIP تلقائياً" class="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="phone-incoming" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>جلب من MicroSIP</span>
               </button>
-              <div class="mt-2.5 text-center">
-                <div id="mic-label" class="text-xs font-bold text-slate-200">انقر لبدء الاستماع للمكالمة</div>
-                <div class="text-[10px] text-slate-400 mt-0.5">استماع مستمر للطرفين (الموظف والمتصل) • <span class="kbd-shortcut">Space</span></div>
-              </div>
-
-              <!-- Upload / Drop Call Recording File from MicroSIP -->
-              <div class="mt-3 pt-2.5 border-t border-slate-800/80 w-full px-4 flex items-center justify-between text-xs">
-                <label class="cursor-pointer text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 text-[11px] font-semibold">
-                  <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
-                  <span>رفع تسجيل مكالمة من MicroSIP (.wav / .mp3)</span>
-                  <input type="file" id="audio-file-input" accept="audio/*" class="hidden">
-                </label>
-                <button id="microsip-help-link" class="text-slate-400 hover:text-slate-200 text-[11px] underline">كيف أربط الصوت؟</button>
-              </div>
-
             </div>
 
-            <!-- Live Transcript Card & Editor -->
-            <div class="flex-1 flex flex-col">
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
-                  نص المكالمة المباشر (التفريغ الصوتي للطرفين):
-                </label>
-                <div class="flex items-center gap-1">
-                  <span id="word-count" class="text-[10px] text-slate-500">0 كلمة</span>
-                  <button id="clear-transcript-btn" title="مسح النص" class="text-slate-400 hover:text-rose-400 p-1 text-xs transition">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Real-time Transcript Textarea -->
-              <div class="relative flex-1">
-                <textarea id="transcript-box" rows="7" placeholder="سيبدأ التفريغ الصوتي التلقائي فور تحدث العميل بالعامية السعودية... (يمكنك أيضاً كتابة أو لصق نص هنا مباشرة)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 leading-relaxed focus:border-emerald-500 focus:outline-none resize-y selectable-text"></textarea>
-                <div id="interim-text" class="text-xs text-emerald-400/80 italic mt-1 px-1 min-h-[16px]"></div>
-              </div>
+            <!-- Input Textarea -->
+            <div>
+              <textarea id="transcript-box" rows="7" placeholder="الصق هنا رسالة الواتساب، أو سيظهر تفريغ المكالمة الصوتية المرفوعة هنا تلقائياً... ثم اضغط استخراج" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 leading-relaxed focus:border-emerald-500 focus:outline-none resize-y"></textarea>
             </div>
 
             <!-- Quick Medical Procedure Tags -->
-            <div class="mt-3 pt-3 border-t border-slate-800/80">
-              <div class="text-[11px] font-semibold text-slate-400 mb-1.5">إضافة إجراءات طبية سريعة للنص:</div>
+            <div>
+              <div class="text-[11px] font-semibold text-slate-400 mb-1.5">إضافة سريعة للنص:</div>
               <div id="quick-tags-container" class="flex flex-wrap gap-1.5">
                 <!-- Injected via JS -->
               </div>
             </div>
 
-            <!-- Primary AI Extract Action Button -->
-            <div class="mt-4">
-              <button id="extract-btn" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition transform active:scale-[0.99] border border-emerald-400/30">
-                <i data-lucide="sparkles" class="w-4 h-4 animate-spin-slow"></i>
-                <span id="extract-btn-text">استخراج وتحديث البيانات (Gemini AI)</span>
+            <!-- Extract Action Button -->
+            <div class="pt-1">
+              <button id="extract-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition transform active:scale-[0.99] border border-emerald-400/30">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span id="extract-btn-text">استخراج وتعبئة النموذج بالذكاء الاصطناعي</span>
                 <span class="kbd-shortcut mr-auto bg-black/20 border-white/20">Ctrl+Enter</span>
               </button>
             </div>
 
           </div>
-
         </div>
 
-        <!-- LEFT PANEL: Structured Clinical Booking Form (Editable) & 1-Click Copy Actions -->
+        <!-- LEFT PANEL: Structured Clinical Booking Form & 1-Click Copy -->
         <div class="lg:col-span-7 flex flex-col gap-4">
-          
-          <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col border border-slate-800 shadow-xl">
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col border border-slate-800 shadow-xl space-y-4">
             
-            <!-- Section Header & Urgency Triage Badge Indicator -->
-            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-800">
+            <!-- Section Header & Badges -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                   <i data-lucide="clipboard-list" class="w-4 h-4"></i>
                 </div>
                 <div>
-                  <h2 class="text-sm sm:text-base font-bold text-slate-100">بيانات الحجز المستخرجة</h2>
-                  <p class="text-[11px] text-slate-400">محققة ومجهزة للمراجعة والنسخ الفوري للـ CRM</p>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-100">بيانات الحجز المجهزة للـ CRM</h2>
+                  <p class="text-[11px] text-slate-400">جاهزة للمراجعة والتعديل والنسخ الفوري</p>
                 </div>
               </div>
 
-              <!-- Triage Urgency Badge Indicator -->
-              <div id="urgency-badge-display" class="badge-normal px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span id="urgency-badge-text">تصنيف الحالة: عادي</span>
+              <div class="flex items-center gap-2">
+                <div id="ai-timing-badge" class="hidden px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-[11px] font-mono text-cyan-300 flex items-center gap-1.5">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span id="ai-timing-text">استغرق: --</span>
+                </div>
+                <div id="urgency-badge-display" class="badge-normal px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span id="urgency-badge-text">تصنيف الحالة: عادي</span>
+                </div>
               </div>
             </div>
 
-            <!-- Booking Form Fields (2-Column Responsive Layout) -->
-            <form id="booking-form" class="space-y-3.5" onsubmit="event.preventDefault()">
+            <!-- Category Switcher Tabs -->
+            <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800/80">
+              <button type="button" id="tab-cat-doctor" data-cat="doctor" class="category-tab-btn py-2 px-1 sm:px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-md">
+                <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
+                <span class="truncate">كشف أطباء واستشاريين</span>
+              </button>
+              <button type="button" id="tab-cat-nursing" data-cat="nursing_lab" class="category-tab-btn py-2 px-1 sm:px-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+                <i data-lucide="syringe" class="w-3.5 h-3.5"></i>
+                <span class="truncate">تمريض ومختبر وتحاليل</span>
+              </button>
+              <button type="button" id="tab-cat-physio" data-cat="physio" class="category-tab-btn py-2 px-1 sm:px-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+                <i data-lucide="accessibility" class="w-3.5 h-3.5"></i>
+                <span class="truncate">علاج طبيعي وتأهيل</span>
+              </button>
+            </div>
+
+            <!-- Booking Form Fields -->
+            <form id="booking-form" class="space-y-3" onsubmit="event.preventDefault()">
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <!-- Patient Name -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
                     <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    اسم المريض / المتصل:
+                    <span>الاسم :</span>
                   </label>
-                  <input type="text" id="field-patient-name" placeholder="مثال: الوالد أبو فهد / عبد الله الغامدي" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                  <input type="text" id="field-patient-name" placeholder="مثال: عبد العزيز التميمي / أم فيصل" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+                </div>
+
+                <!-- Patient Phone -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="phone" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span>رقم الجوال :</span>
+                  </label>
+                  <input type="text" id="field-patient-phone" placeholder="مثال: 0555978282" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-cyan-500 focus:outline-none transition font-mono">
+                </div>
+
+                <!-- Age -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>العمر :</span>
+                  </label>
+                  <input type="text" id="field-patient-age" placeholder="مثال: 68 سنة" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-amber-500 focus:outline-none transition">
+                </div>
+              </div>
+
+              <!-- Chronic Diseases -->
+              <div id="container-chronic-diseases" class="transition-all duration-300">
+                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                  <i data-lucide="heart-pulse" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>الامراض المزمنة :</span>
+                </label>
+                <input type="text" id="field-chronic-diseases" placeholder="مثال: السكري، ضغط دم مزمن، دعامة قلبية سابقة..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
+              </div>
+
+              <!-- Symptoms -->
+              <div>
+                <label id="label-symptoms" class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-teal-400"></i>
+                  <span>الاعراض :</span>
+                </label>
+                <textarea id="field-symptoms" rows="2" placeholder="مثال: ثقل بالصدر مع نهجان وضيق تنفس عند الحركة..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none leading-relaxed transition resize-y"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Location -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i>
+                    <span>الموقع :</span>
+                  </label>
+                  <input type="text" id="field-district" placeholder="مثال: الرياض - حي الملقا - شارع وادي السرحان" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
                 </div>
 
                 <!-- Service Type -->
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <i data-lucide="activity" class="w-3.5 h-3.5 text-teal-400"></i>
-                    نوع الخدمة المطلوبة:
+                  <label id="label-service-type" class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="activity" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>نوع الخدمة :</span>
                   </label>
                   <select id="field-service-type" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
-                    <option value="تمريض منزلي">تمريض منزلي (غيار جروح، قرح سكري، محاليل، إبر...)</option>
-                    <option value="زيارة طبيب">زيارة طبيب (كشف باطنة، كبار سن، أطفال، عظام...)</option>
-                    <option value="إسعاف وطوارئ">إسعاف وطوارئ (حالات حرجة، نقل إسعافي)</option>
-                    <option value="علاج طبيعي">علاج طبيعي وتأهيل حركي وعصبي</option>
-                    <option value="سحب عينات ومختبر">سحب عينات ومختبر منزلي شامل</option>
-                    <option value="رعاية كبار السن">رعاية كبار السن ومرافق تمريضي</option>
-                    <option value="أشعة وفحوصات منزلية">أشعة وفحوصات منزلية (تخطيط قلب ECG، سونار)</option>
                   </select>
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <!-- District / Area -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i>
-                    المدينة / الحي والعنوان:
-                  </label>
-                  <input type="text" id="field-district" placeholder="مثال: الرياض - حي النرجس / جدة - حي الشاطئ" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
-                </div>
-
-                <!-- Preferred Time -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-                    الموعد المقترح للزيارة:
-                  </label>
-                  <input type="text" id="field-preferred-time" placeholder="مثال: اليوم بعد صلاة العصر (4:30 عصراً)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
-                </div>
-              </div>
-
-              <!-- Medical Notes & Clinical Request -->
+              <!-- Preferred Time -->
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                  <i data-lucide="file-heart" class="w-3.5 h-3.5 text-cyan-400"></i>
-                  ملاحظات الحالة والطلب الطبي (التشخيص / الإجراء / الأعراض):
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>زمن الخدمة :</span>
                 </label>
-                <textarea id="field-medical-notes" rows="3" placeholder="مثال: مريض سكري وضغط طريح فراش، مطلوب غيار على قرحة قدم سكري وتعقيم الجرح وقياس المؤشرات الحيوية..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none leading-relaxed transition resize-y"></textarea>
+                <input type="text" id="field-preferred-time" placeholder="مثال: اليوم بعد صلاة العصر (4:30 عصراً)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 focus:border-emerald-500 focus:outline-none transition">
               </div>
 
-              <!-- Urgency Selection Buttons -->
+              <!-- Urgency Buttons -->
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
                   <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
-                  درجة الاستعجال والفرز الطبي:
+                  <span>درجة الاستعجال والفرز:</span>
                 </label>
                 <div class="grid grid-cols-3 gap-2">
-                  <button type="button" data-urgency="عادي" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-emerald-500/50 bg-emerald-950/40 text-emerald-300">
+                  <button type="button" data-urgency="عادي" class="urgency-choice-btn py-1.5 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-emerald-500/50 bg-emerald-950/40 text-emerald-300">
                     <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
                     <span>عادي</span>
                   </button>
-                  <button type="button" data-urgency="عاجل" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-amber-300">
+                  <button type="button" data-urgency="عاجل" class="urgency-choice-btn py-1.5 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-amber-300">
                     <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
                     <span>عاجل</span>
                   </button>
-                  <button type="button" data-urgency="طوارئ قصوى" class="urgency-choice-btn py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-rose-400">
+                  <button type="button" data-urgency="طوارئ قصوى" class="urgency-choice-btn py-1.5 px-3 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-1.5 border-slate-800 bg-slate-900/60 text-slate-400 hover:text-rose-400">
                     <i data-lucide="flame" class="w-3.5 h-3.5"></i>
                     <span>طوارئ قصوى</span>
                   </button>
@@ -421,17 +336,34 @@
 
             </form>
 
-            <!-- HIGH PRIORITY 1-CLICK ACTION BUTTONS -->
-            <div class="mt-6 pt-4 border-t border-slate-800 space-y-2.5">
+            <!-- 1-CLICK ACTION BUTTONS -->
+            <div class="pt-3 border-t border-slate-800 space-y-2.5">
               
+              <!-- Phone Toggle -->
+              <div class="flex items-center justify-between gap-2 p-2 bg-slate-950/80 rounded-xl border border-slate-800 text-xs">
+                <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+                  <i data-lucide="phone-call" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>رقم العميل عند النسخ:</span>
+                </span>
+                <div class="flex items-center gap-1">
+                  <button type="button" id="crm-phone-with" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 bg-emerald-600 text-white shadow text-xs">
+                    <i data-lucide="check" class="w-3 h-3"></i>
+                    <span>مع الرقم</span>
+                  </button>
+                  <button type="button" id="crm-phone-without" class="px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 text-xs">
+                    <span>بدون رقم</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Primary Action: Copy for CRM -->
-              <button id="copy-crm-btn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/80 transition transform active:scale-[0.99] border border-emerald-400/40">
+              <button id="copy-crm-btn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/80 transition transform active:scale-[0.99] border border-emerald-400/40">
                 <i data-lucide="copy" class="w-5 h-5"></i>
-                <span>نسخ بيانات الحجز للـ CRM</span>
+                <span id="copy-crm-btn-text">نسخ بيانات الحجز للـ CRM</span>
                 <span class="kbd-shortcut mr-auto bg-emerald-900/60 border-emerald-400/40 text-emerald-100">Ctrl+Shift+C</span>
               </button>
 
-              <!-- Secondary Action: Copy WhatsApp Location Template -->
+              <!-- Secondary Actions -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button id="copy-whatsapp-btn" class="w-full py-2.5 px-3 rounded-xl bg-teal-950 hover:bg-teal-900 text-teal-200 border border-teal-700/50 font-semibold text-xs flex items-center justify-center gap-2 transition">
                   <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
@@ -439,7 +371,7 @@
                   <span class="kbd-shortcut bg-teal-900/80 border-teal-600/40 text-[10px]">Ctrl+Shift+W</span>
                 </button>
 
-                <!-- Reset Form for New Call -->
+                <!-- Reset Form -->
                 <button id="reset-form-btn" class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition">
                   <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-400"></i>
                   <span>تفريغ الحقول لحجز جديد</span>
@@ -449,12 +381,567 @@
             </div>
 
           </div>
-
         </div>
 
       </div>
 
     </main>
+
+    <!-- Conversational AI Chat Assistant View -->
+    <div id="assistant-view" class="hidden flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col h-[calc(100vh-115px)] overflow-hidden">
+      
+      <!-- Top Assistant Bar -->
+      <div class="glass-panel rounded-2xl p-3 mb-3 flex items-center justify-between gap-2 border border-slate-800 shrink-0 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+            <i data-lucide="bot" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-white">الوكيل الطبي المساعد (AI HomeCare Chat Agent)</h2>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>محادثة ذكية نشطة</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">أرسل صورة سكرين شوت أو نص الحجز لتحويله فوراً لنموذج CRM مزدوج ورسائل واتساب للقروب</p>
+          </div>
+        </div>
+
+        <!-- Quick Top Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button id="wa-toggle-side-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow">
+            <i data-lucide="calendar-check" class="w-4 h-4 text-purple-400"></i>
+            <span class="hidden sm:inline">جدول المواعيد والطاقم</span>
+            <span id="wa-apt-badge" class="px-1.5 py-0.2 bg-purple-500/20 text-purple-300 rounded-full text-[10px] border border-purple-500/30">0</span>
+          </button>
+          <button id="wa-new-chat-btn" title="بدء محادثة جديدة ومسح الشات" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-rose-300 border border-slate-700 transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Workspace Grid: Chat Feed (Left/Center) + Optional Side Drawer (Right) -->
+      <div class="flex-1 flex gap-3 overflow-hidden">
+        
+        <!-- Chat Feed & Input Area -->
+        <div class="flex-1 flex flex-col glass-panel rounded-2xl border border-slate-800 overflow-hidden relative shadow-xl">
+          
+          <!-- Chat Messages Scrollable Feed -->
+          <div id="wa-chat-feed" class="flex-1 p-3 sm:p-4 overflow-y-auto space-y-4 custom-scrollbar">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- Attached Image Preview Bar (Appears when an image is staged) -->
+          <div id="wa-image-preview-bar" class="hidden px-4 py-2 bg-slate-900/95 border-t border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img id="wa-preview-img" src="" alt="معاينة الصورة" class="w-12 h-12 object-cover rounded-lg border border-emerald-500/50 shadow" />
+              <div>
+                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                  صورة مرفقة جاهزة للتحليل 📸
+                </span>
+                <p class="text-[10px] text-slate-400">اضغط إرسال للتحليل فوراً أو اكتب تعليمات إضافية</p>
+              </div>
+            </div>
+            <button id="wa-remove-image-btn" class="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition" title="إلغاء الصورة">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Bottom Chat Input Bar -->
+          <div class="p-2.5 sm:p-3 bg-slate-950/90 border-t border-slate-800/80 flex flex-col gap-2 shrink-0">
+            
+            <!-- Quick Suggestion Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scrollbar">
+              <span class="text-slate-500 font-semibold shrink-0">أمثلة سريعة:</span>
+              <button class="wa-chip-btn shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-emerald-500/40 transition flex items-center gap-1" data-preset="specialist">
+                <span>👨‍⚕️ كشف قلب (دكتور)</span>
+              </button>
+              <button class="wa-chip-btn shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-cyan-500/40 transition flex items-center gap-1" data-preset="nursing">
+                <span>🩺 سحب دم وغيار (تمريض)</span>
+              </button>
+              <button class="wa-chip-btn shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-teal-500/40 transition flex items-center gap-1" data-preset="physio">
+                <span>🏃‍♂️ تأهيل جلطة (علاج طبيعي)</span>
+              </button>
+              <button class="wa-chip-btn shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 border border-purple-800/50 transition flex items-center gap-1" data-action="show_schedule">
+                <span>📅 مواعيد اليوم</span>
+              </button>
+              <button class="wa-chip-btn shrink-0 px-2.5 py-1 rounded-lg bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-800/50 transition flex items-center gap-1" data-action="show_staff">
+                <span>👥 ستاف التمريض والسواقين</span>
+              </button>
+            </div>
+
+            <!-- Input Box + Action Buttons -->
+            <div class="flex items-end gap-2 bg-slate-900/90 border border-slate-800 focus-within:border-emerald-500/80 rounded-2xl p-2 transition">
+              
+              <!-- Attach Image Button -->
+              <label for="wa-file-input" class="p-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition cursor-pointer shrink-0" title="إرفاق صورة أو سكرين شوت (أو الصق مباشرة Ctrl+V)">
+                <i data-lucide="image-plus" class="w-5 h-5"></i>
+                <input type="file" id="wa-file-input" accept="image/*" class="hidden">
+              </label>
+
+              <!-- Textarea for Chat Input -->
+              <textarea id="wa-chat-input" dir="rtl" rows="1" placeholder="اكتب أو الصق نص رسالة العميل، أو اسحب سكرين شوت هنا... (Enter للإرسال)" class="flex-1 bg-transparent border-0 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed"></textarea>
+
+              <!-- Send Button -->
+              <button id="wa-send-btn" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-emerald-950/80 transition active:scale-95 shrink-0">
+                <span>إرسال</span>
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Collapsible Side Panel: Schedule & Staff -->
+        <div id="wa-side-panel" class="hidden lg:flex w-80 flex-col gap-3 shrink-0 overflow-y-auto custom-scrollbar">
+          
+          <!-- Appointments Mini Widget -->
+          <div class="glass-panel rounded-2xl p-3 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i>
+                <h3 class="text-xs font-bold text-slate-200">جدول مواعيد اليوم</h3>
+              </div>
+              <span id="wa-side-apt-count" class="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 font-mono">0 مواعيد</span>
+            </div>
+
+            <!-- Appointments List -->
+            <div id="wa-side-apt-list" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-0.5">
+              <div class="text-center py-6 text-slate-500 text-xs">لا توجد مواعيد مضافة بعد</div>
+            </div>
+          </div>
+
+          <!-- Staff Quick Readiness Widget -->
+          <div class="glass-panel rounded-2xl p-3 border border-slate-800 flex flex-col gap-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="text-xs font-bold text-slate-200">الطاقم والقروب</h3>
+              </div>
+              <span class="text-[10px] text-emerald-400 font-mono">جاهزية فورية</span>
+            </div>
+
+            <!-- Group Mentions Box -->
+            <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-1.5 text-xs">
+              <div class="text-[11px] font-bold text-slate-300">جهات الاتصال بالمنشن التلقائي:</div>
+              <div class="flex items-center justify-between bg-slate-900/90 p-1.5 rounded-lg border border-slate-800/80">
+                <span class="text-[11px] text-slate-300">👩‍⚕️ رئيسية التمريض:</span>
+                <span class="text-[10px] text-cyan-300 font-mono bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">@~Alhayat homecare</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-900/90 p-1.5 rounded-lg border border-slate-800/80">
+                <span class="text-[11px] text-slate-300">🚗 رئيس السواقين:</span>
+                <span class="text-[10px] text-cyan-300 font-mono bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">@~Mohammed Imran Sherani</span>
+              </div>
+            </div>
+
+            <!-- Staff Status Cards -->
+            <div class="space-y-1.5 text-xs">
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="text-slate-200">🚑 سيارة إسعاف 1 (متاحة)</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span class="text-slate-200">👩‍⚕️ ستاف التمريض (في زيارة)</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="text-slate-200">🚗 حركة السواقين (جاهز للتوصيل)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Customer Service Tools & Calculator View (مجمع الحياة الطبي) -->
+  <div id="cstool-view" class="hidden flex-1 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 flex flex-col overflow-y-auto custom-scrollbar">
+      
+      <!-- Top Section Header -->
+      <div class="glass-panel rounded-2xl p-4 mb-4 flex items-center justify-between border border-slate-800 shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-400 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-amber-500/20">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white">أدوات خدمة العملاء — مجمع الحياة الطبي 🏥</h2>
+            <p class="text-xs text-slate-400">القوالب الجاهزة للواتساب، حاسبة الخصم والعروض، وحاسبة المسافة لأقرب فرع بالرياض</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Column Responsive Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+        
+        <!-- CARD 1: Ready Templates (القوالب الجاهزة) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-bold text-slate-100">📋 القوالب الجاهزة</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">نسخ فوري للواتساب</span>
+          </div>
+
+          <!-- Template 1: Welcome & Details -->
+          <div class="space-y-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">1️⃣ ترحيب وطلب بيانات</span>
+              <button id="cs-copy-welcome-btn" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-welcome" rows="5" class="w-full bg-slate-900/80 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-emerald-500 focus:outline-none resize-none">معاك محمد من مجمع الحياة الطبي - قسم الرعاية المنزلية 🏠
+لإكمال طلب الزيارة، من فضلك أرسل:
+1) الاسم الكامل
+2) اللوكيشن (اضغط 📎 ثم Location وشاركها معنا)
+3) الوقت المناسب للزيارة</textarea>
+          </div>
+
+          <!-- Template 2: Booking Confirmation with Dynamic Price -->
+          <div class="space-y-2 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">2️⃣ تأكيد حجز مع السعر</span>
+              <button id="cs-copy-booking-btn" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1 shadow">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ مع السعر</span>
+              </button>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">اكتب السعر المبدئي للخدمة (ريال):</label>
+              <input type="number" id="cs-booking-price-input" placeholder="مثال: 150" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none">
+            </div>
+            <textarea id="cs-tpl-booking" rows="7" class="w-full bg-slate-900/80 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-emerald-500 focus:outline-none resize-none">تم تأكيد حجزك بنجاح ✅
+
+السعر المبدئي للخدمة: [السعر] ريال
+يرجى العلم أن هذا سعر تقديري مبدئي، وقد تُضاف رسوم إضافية على الفاتورة النهائية حسب الفحص الفعلي والاحتياج الحقيقي أثناء الزيارة.
+
+سيتم إعلامك بأي تكلفة إضافية بشكل واضح وشفاف قبل تنفيذها ✅
+شكراً لثقتك بنا 🙏</textarea>
+          </div>
+
+          <!-- Template 3: Lead Introduction -->
+          <div class="space-y-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">3️⃣ رسالة تعريفية للخدمات</span>
+              <button id="cs-copy-lead-btn" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-lead" rows="8" class="w-full bg-slate-900/80 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-emerald-500 focus:outline-none resize-y">💙 صحة أحبابكم ورعايتهم أولوية بالنسبة لنا..
+
+لن تحتاجوا إلى عناء التنقل والانتظار! نوفر لكم في مجمع الحياة الطبي خدمة الرعاية المنزلية المتكاملة لكبار السن ولمن يحتاج متابعة مستمرة 🏠✨
+
+🩺 نقدم لكم منزلياً:
+• زيارات أطباء عامين وأخصائيين 👨‍⚕️
+• برنامج علاج طبيعي متخصص 💪
+• سحب جميع التحاليل الطبية 🧪
+• خدمة الإسعاف الطبي عند الحاجة 🚑
+
+📝 للحجز والاستفسار عن الأسعار والعروض المتاحة، أرسل لنا:
+الاسم:
+الحي: 📍
+نوع الخدمة:
+
+🌿 دمتم ودام أحبابكم بصحة وعافية.</textarea>
+          </div>
+
+        </div>
+
+        <!-- CARD 2: Discount & Promo Calculator (حاسبة الخصم) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <i data-lucide="percent" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-bold text-slate-100">💸 حاسبة الخصومات والعروض</h3>
+            </div>
+          </div>
+
+          <!-- Price Input -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">السعر قبل الخصم (ريال):</label>
+            <input type="number" id="cs-disc-original" placeholder="مثال: 200" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-mono focus:border-amber-500 focus:outline-none">
+          </div>
+
+          <!-- Quick Discount Buttons -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1.5">اختر نسبة الخصم السريعة:</label>
+            <div class="grid grid-cols-5 gap-1.5">
+              <button type="button" class="cs-disc-btn py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-xs font-bold text-amber-300 transition" data-pct="5">5%</button>
+              <button type="button" class="cs-disc-btn py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-xs font-bold text-amber-300 transition" data-pct="7">7%</button>
+              <button type="button" class="cs-disc-btn py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-xs font-bold text-amber-300 transition" data-pct="10">10%</button>
+              <button type="button" class="cs-disc-btn py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-xs font-bold text-amber-300 transition" data-pct="15">15%</button>
+              <button type="button" class="cs-disc-btn py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-xs font-bold text-amber-300 transition" data-pct="20">20%</button>
+            </div>
+          </div>
+
+          <!-- Custom Percentage Input -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">أو اكتب نسبة خصم مخصصة (%):</label>
+            <div class="flex gap-2">
+              <input type="number" id="cs-disc-custom" placeholder="مثال: 12" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:border-amber-500 focus:outline-none">
+              <button type="button" id="cs-calc-disc-btn" class="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition shadow">احسب</button>
+            </div>
+          </div>
+
+          <!-- Calculation Live Result Card -->
+          <div id="cs-disc-result" class="hidden p-3.5 bg-amber-950/30 border border-amber-500/40 rounded-xl space-y-1 text-xs">
+            <div class="flex items-center justify-between text-slate-300">
+              <span>قيمة الخصم الموفرة:</span>
+              <span id="cs-res-saved" class="font-bold text-amber-400 font-mono">0.00 ريال</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-200 text-sm font-bold pt-1 border-t border-amber-500/20">
+              <span>السعر النهائي بعد الخصم:</span>
+              <span id="cs-res-final" class="text-emerald-400 font-mono text-base">0.00 ريال</span>
+            </div>
+          </div>
+
+          <!-- Generated Promo Message -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">🎉 رسالة العرض الجاهزة للعميل:</span>
+              <button type="button" id="cs-copy-promo-btn" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition flex items-center gap-1 shadow">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ العرض</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-promo" rows="5" class="w-full bg-slate-900/80 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-amber-500 focus:outline-none resize-none">🎉 عرض خاص من مجمع الحياة الطبي
+💵 السعر قبل الخصم: [قبل] ريال
+احصل الآن على خصم [نسبة]% على الخدمة.
+💰 السعر بعد الخصم: [بعد] ريال
+العرض لفترة محدودة، احجز الآن للاستفادة من الخصم ✅</textarea>
+          </div>
+
+        </div>
+
+        <!-- CARD 3: Nearest Branch & Travel Time Calculator (حاسبة أقرب فرع) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-bold text-slate-100">📍 حاسبة أقرب فرع ومسافة الوصول</h3>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            يتم حساب المسافة وزمن الوصول التقديري دائماً من فرعي <b>الفيحاء</b> و <b>اشبيليا</b>، وتحديد <b>أقرب فرع</b> من كل الفروع (الرمال، النفل، النظيم).
+          </p>
+
+          <!-- Input Option A: Google Maps Link -->
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-slate-300">رابط لوكيشن العميل من واتساب (Google Maps):</label>
+            <input type="text" id="cs-cust-link" placeholder="https://maps.app.goo.gl/... أو رابط الخرائط الكامل" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none">
+            <button type="button" id="cs-calc-link-btn" class="w-full mt-1 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow">
+              <i data-lucide="navigation" class="w-3.5 h-3.5"></i>
+              <span>📌 احسب من رابط اللوكيشن</span>
+            </button>
+          </div>
+
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-800"></div>
+            <span class="flex-shrink mx-2 text-[10px] text-slate-500 font-mono">أو بالإحداثيات المباشرة</span>
+            <div class="flex-grow border-t border-slate-800"></div>
+          </div>
+
+          <!-- Input Option B: Direct Coordinates -->
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-slate-300">الإحداثيات (خط العرض, خط الطول):</label>
+            <div class="flex gap-2">
+              <input type="text" id="cs-cust-coords" placeholder="24.7136, 46.6753" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:border-cyan-500 focus:outline-none">
+              <button type="button" id="cs-calc-coords-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition">احسب</button>
+            </div>
+          </div>
+
+          <!-- Branch Result Box -->
+          <div id="cs-branch-result" class="hidden p-3.5 bg-slate-950/90 border border-cyan-500/40 rounded-xl space-y-2 text-xs">
+            <div id="cs-fixed-branches" class="space-y-1 text-slate-300"></div>
+            <div id="cs-nearest-branch" class="pt-2 border-t border-slate-800 text-emerald-400 font-bold text-xs sm:text-sm"></div>
+          </div>
+
+          <!-- Registered Branches Table Accordion/View -->
+          <div class="pt-2 border-t border-slate-800">
+            <div class="text-[11px] font-semibold text-slate-400 mb-1.5">الفروع المسجلة بالرياض:</div>
+            <div class="bg-slate-950/80 rounded-xl border border-slate-800/80 overflow-hidden">
+              <table class="w-full text-[11px] text-right">
+                <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th class="p-2">الفرع</th>
+                    <th class="p-2 font-mono">Lat</th>
+                    <th class="p-2 font-mono">Lng</th>
+                  </tr>
+                </thead>
+                <tbody id="cs-branch-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+              ⏱️ الزمن محسوب على متوسط سرعة 35 كم/ساعة داخل شوارع المدينة.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SECTION: Official Promotional Offers & Packages (عروض وباقات مجمع الحياة الطبي الجاهزة) -->
+      <div class="mt-6 glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
+              <i data-lucide="tag" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-100">🎁 قوالب عروض وباقات مجمع الحياة الطبي للواتساب</h3>
+              <p class="text-[11px] text-slate-400">عروض تسويقية معتمدة وجاهزة للنسخ الفوري للعملاء</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg">4 عروض معتمدة ✅</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Offer 1: Comprehensive Home Care Intro -->
+          <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>عرض الرعاية الصحية المتكاملة 💚</span>
+              </span>
+              <button id="cs-copy-offer1-btn" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ العرض</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-offer1" rows="9" class="w-full bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-emerald-500 focus:outline-none resize-none">مع الحياة... الرعاية الصحية أقرب إليك. 💚
+
+لا تدع الزحام أو صعوبة التنقل تؤخر حصولك على الرعاية التي تستحقها. فريقنا الطبي يقدم خدمات منزلية متكاملة باحترافية عالية، لتصلك الخدمة بكل راحة وأمان.
+
+✨ أطباء | تمريض | علاج طبيعي | تحاليل | أشعة | رعاية مواليد وكبار السن | نقل وإسعاف طبي.
+
+احجز موعدك الآن، فصحتك تستحق أفضل رعاية. 🌿</textarea>
+          </div>
+
+          <!-- Offer 2: Physiotherapy Packages -->
+          <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                <span>عروض باقات العلاج الطبيعي المنزلي 💪</span>
+              </span>
+              <button id="cs-copy-offer2-btn" class="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ العرض</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-offer2" rows="9" class="w-full bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-cyan-500 focus:outline-none resize-none">خُطوتك الأولى نحو حياة أكثر نشاطًا وصحة تبدأ الآن!
+
+هل تعاني من آلام الظهر، ضعف الحركة أو تحتاج إلى برنامج تأهيلي يساعدك على استعادة نشاطك؟
+مع عروض العلاج الطبيعي من الحياة للطب المنزلي، نوفر لك جلسات علاجية متخصصة وأنت في راحة منزلك ..
+
+استفد من عروضنا المميزة:
+
+• جلسة فحص وتقييم فقط 350 ريال
+
+• باقة 6 جلسات 2100 ريال
+• باقة 12 جلسة 4000 ريال + جلسة مجانية
+• باقة 24 جلسة 6500 ريال + جلستين مجانيتين
+
+احجز الآن واستفد من الخصم عند حجز إحدى الباقات!
+
+الحياة للطب المنزلي — رعايتك تصل إليك أينما كنت 🌿🤍</textarea>
+          </div>
+
+          <!-- Offer 3: Monthly Nursing Contract -->
+          <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <i data-lucide="heart-pulse" class="w-3.5 h-3.5"></i>
+                <span>عرض عقود التمريض الشهري (طاقم فلبيني) 🌹</span>
+              </span>
+              <button id="cs-copy-offer3-btn" class="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ العرض</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-offer3" rows="11" class="w-full bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-amber-500 focus:outline-none resize-none">🌹 مرحباً بك في مجمع عيادات الحياة الطبي قسم الرعاية المنزلية
+
+نُقدّر ثقتك بنا، ويسعدنا أن نُقدّم لك خدمات التمريض المنزلي بأعلى معايير الجودة والاحترافية.
+
+لدينا عرض خاص لفترة محدودة على العقود الشهرية للطاقم الفلبيني المُدرّب، بخبرة تتجاوز 7 سنوات في التعامل مع:
+
+• حديثي الولادة 👶
+• كبار السن 👴👵
+• مرضى ما بعد العمليات الجراحية 🏥
+
+🔥 العرض الاستثنائي:
+السعر الأصلي للعقد الشهري 16,000 ريال
+والآن فقط بـ 11,500 ريال – وفر أكثر من 28%!
+
+⏳ العدد محدود – لا تُفوّت الفرصة.
+
+نغطي جميع مناطق المملكة، وفريقنا جاهز لخدمتك في أي وقت.
+
+للتواصل والاستفسار:
+واتساب: 0553849193
+اتصال: 920022480</textarea>
+          </div>
+
+          <!-- Offer 4: Referral Discount -->
+          <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                <i data-lucide="gift" class="w-3.5 h-3.5"></i>
+                <span>عرض تذكير العروض وخصم الترشيح 🌿</span>
+              </span>
+              <button id="cs-copy-offer4-btn" class="px-2.5 py-1 rounded-lg bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>نسخ العرض</span>
+              </button>
+            </div>
+            <textarea id="cs-tpl-offer4" rows="11" class="w-full bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed focus:border-purple-500 focus:outline-none resize-none">عميلنا العزيز 🌿
+
+لأن صحتك وسلامتك هي أولويتنا، نود تذكيرك بأن عروض الرعاية المنزلية ما زالت مستمرة لفترة محدودة.
+
+استفد من خصم إضافي:
+• رشحنا لأحد أصدقائك أو عائلتك ليستفيد من خصم 7% إضافي على خدمات الرعاية المنزلية
+• واحصل على خصم إضافي 14% عند حجز الخدمة المنزلية القادمة
+
+✨ لا تفوت الفرصة، واحجز الآن واستفد من أفضل العروض على خدمات الرعاية المنزلية.
+
+📞 سارع بالحجز قبل انتهاء العرض، ويسعدنا خدمتك والإجابة على جميع استفساراتك.</textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
 
   </div>
 
@@ -629,10 +1116,13 @@
         <div>
           <label class="block font-semibold text-slate-200 mb-1">نموذج الذكاء الاصطناعي (Model):</label>
           <select id="setting-model" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
-            <option value="gemini-2.0-flash">Gemini 2.0 Flash (النموذج الرسمي الأحدث - فائق السرعة والدقة في الصوت)</option>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash (مستقر وموثوق)</option>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="auto">⚡ اختيار تلقائي لأفضل وأسرع نموذج متاح (Auto - موصى به)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (الأسرع عالمياً في تفريغ التسجيلات ⚡)</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (عالي الدقة والسرعة)</option>
+            <option value="gemini-3.6-flash">Gemini 3.6 Flash (أحدث إصدار)</option>
+            <option value="offline">المحرك الداخلي المحلي (بدون API - استهلاك 0 توكنز ومجاني تماماً 🟢)</option>
           </select>
+          <p class="text-[10px] text-emerald-400 mt-1">يتم فحص وتحديد النموذج الأسرع والأكثر استقراراً تلقائياً لمنع أي أخطاء.</p>
         </div>
 
         <!-- Dialect Selection -->
@@ -677,6 +1167,6 @@
   </div>
 
   <!-- Unified Standalone Bundle (Zero CORS Restrictions) -->
-  <script src="bundle.js"></script>
+  <script src="bundle.js?v=clean.offers.20"></script>
 </body>
 </html>
